@@ -16,6 +16,8 @@ from sqlalchemy.orm import Session
 from core.helper.encrypter import decrypt_token, encrypt_token, obfuscated_token
 from core.ops.entities.config_entity import (
     OPS_FILE_PATH,
+    ArizeConfig,
+    PhoenixConfig,
     LangfuseConfig,
     LangSmithConfig,
     OpikConfig,
@@ -33,6 +35,7 @@ from core.ops.entities.trace_entity import (
     TraceTaskName,
     WorkflowTraceInfo,
 )
+from core.ops.arize_phoenix_trace.arize_phoenix_trace import ArizePhoenixDataTrace
 from core.ops.langfuse_trace.langfuse_trace import LangFuseDataTrace
 from core.ops.langsmith_trace.langsmith_trace import LangSmithDataTrace
 from core.ops.opik_trace.opik_trace import OpikDataTrace
@@ -50,6 +53,18 @@ def build_opik_trace_instance(config: OpikConfig):
 
 
 provider_config_map: dict[str, dict[str, Any]] = {
+    TracingProviderEnum.ARIZE.value: {
+        "config_class": ArizeConfig,
+        "secret_keys": ["api_key", "space_id"],
+        "other_keys": ["project", "endpoint"],
+        "trace_instance": ArizePhoenixDataTrace,
+    },
+    TracingProviderEnum.PHOENIX.value: {
+        "config_class": PhoenixConfig,
+        "secret_keys": ["api_key"],
+        "other_keys": ["project", "endpoint"],
+        "trace_instance": ArizePhoenixDataTrace,
+    },
     TracingProviderEnum.LANGFUSE.value: {
         "config_class": LangfuseConfig,
         "secret_keys": ["public_key", "secret_key"],
